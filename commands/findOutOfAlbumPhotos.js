@@ -197,4 +197,15 @@ export default [
 			return output;
 		}
 	}
+	{
+		name: 'Find private photos which are in other albums',
+		scopes: 'https://www.googleapis.com/auth/photoslibrary.readonly',
+
+		async run() {
+			console.log('findPrivatePhotos : running');
+			const output = await runPrivateAsync(true);
+			console.log('findPrivatePhotos : finished');
+			return output;
+		}
+	}
 ]
