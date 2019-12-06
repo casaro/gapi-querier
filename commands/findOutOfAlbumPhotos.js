@@ -1,6 +1,7 @@
 import apiGooglePhotos from '../helpers/google-photos.js';
 
 const _mediaItems = {};
+const _markedMediaItems = {};
 
 function storeMediaItems(mediaItems) {
 	if (!mediaItems) return;
@@ -14,6 +15,13 @@ function forgetMediaItems(mediaItems) {
 
 	for (const mi of mediaItems) {
 		delete _mediaItems[mi.id];
+	}
+}
+function markMediaItems(mediaItems) {
+	for (const mi of mediaItems) {
+		if (mi.id in _mediaItems) {
+			_markedMediaItems[mi.id] = mi.productUrl;
+		}
 	}
 }
 
@@ -95,6 +103,47 @@ async function runAsync(checkSharedAlbums) {
 	}
 	else return 'No out-of-album photos found';
 }
+
+async function runPrivateAsync() {
+	await requestPagedRecursively('GET', '/mediaItems?search', { albumName: 'Privat', pageSize: 100 },
+				      async (results) => storeMediaItems(results.mediaItems));
+
+	await requestPagedRecursively('GET', '/albums?pageSize=50', null, async (results) => {
+		if (!results.albums) return;
+
+		for (const a of results.albums) {
+			await requestPagedRecursively(
+				'POST', '/mediaItems:search', { albumId: a.id, pageSize: 100 },
+				async (results) => markMediaItems(results.mediaItems));
+		}
+	});
+
+	if (Object.keys(_markedMediaItems).length) {
+		const frag = document.createDocumentFragment(),
+			  table = document.createElement('table'),
+			  tableId = 'tableFindOutOfAlbumPhotos';
+
+		for (const id in _markedMediaItems) {
+			const url = _markedMediaItems[id],
+				  tr = document.createElement('tr');
+
+			tr.innerHTML =
+				//`<td>${id}<td>` +
+				`<td><a href='${url}' target='_blank'>${url}</a><td>`;
+
+			table.appendChild(tr);
+		}
+
+		frag.appendChild(createSaveLink(tableId));
+
+		table.id = tableId;
+		frag.appendChild(table);
+
+		return frag;
+	}
+	else return 'No out-of-album photos found';
+}
+
 function createSaveLink(tableId) {
 	const divContainer = document.createElement('div'),
 		  btnSave = document.createElement('button');
