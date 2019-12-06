@@ -105,7 +105,7 @@ async function runAsync(checkSharedAlbums) {
 }
 
 async function runPrivateAsync() {
-	await requestPagedRecursively('GET', '/mediaItems?search', { albumName: 'Privat', pageSize: 100 },
+	await requestPagedRecursively('GET', '/mediaItems?search', { albumId: 'AF1QipMH-7ohtxEYaO99gnRRmJZsQZkFVEVtTkk3Na4CtL9AjOfK1PnJOQPrq8v8_ReKWQ', pageSize: 100 },
 				      async (results) => storeMediaItems(results.mediaItems));
 
 	await requestPagedRecursively('GET', '/albums?pageSize=50', null, async (results) => {
