@@ -196,7 +196,7 @@ export default [
 			console.log('findOutOfAlbumPhotos(w/shared) : finished');
 			return output;
 		}
-	}
+	},
 	{
 		name: 'Find private photos which are in other albums',
 		scopes: 'https://www.googleapis.com/auth/photoslibrary.readonly',
