@@ -2,6 +2,7 @@ import apiGooglePhotos from '../helpers/google-photos.js';
 
 const _mediaItems = {};
 const _markedMediaItems = {};
+const _privateAlbumId = 'AF1QipMH-7ohtxEYaO99gnRRmJZsQZkFVEVtTkk3Na4CtL9AjOfK1PnJOQPrq8v8_ReKWQ';
 
 function storeMediaItems(mediaItems) {
 	if (!mediaItems) return;
@@ -105,13 +106,14 @@ async function runAsync(checkSharedAlbums) {
 }
 
 async function runPrivateAsync() {
-	await requestPagedRecursively('GET', '/mediaItems?search', { albumId: 'AF1QipMH-7ohtxEYaO99gnRRmJZsQZkFVEVtTkk3Na4CtL9AjOfK1PnJOQPrq8v8_ReKWQ', pageSize: 100 },
+	await requestPagedRecursively('GET', '/mediaItems?search', { albumId: _privateAlbumId, pageSize: 100 },
 				      async (results) => storeMediaItems(results.mediaItems));
 
 	await requestPagedRecursively('GET', '/albums?pageSize=50', null, async (results) => {
 		if (!results.albums) return;
 
 		for (const a of results.albums) {
+			if (a.id == _privateAlbumId) continue;
 			await requestPagedRecursively(
 				'POST', '/mediaItems:search', { albumId: a.id, pageSize: 100 },
 				async (results) => markMediaItems(results.mediaItems));
